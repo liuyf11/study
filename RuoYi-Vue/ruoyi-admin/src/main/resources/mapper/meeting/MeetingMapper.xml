@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.meeting.mapper.MeetingMapper">
+    
+    <resultMap type="Meeting" id="MeetingResult">
+        <result property="meetingID"    column="meetingID"    />
+        <result property="meetingTitle"    column="meetingTitle"    />
+        <result property="location"    column="location"    />
+        <result property="startTime"    column="startTime"    />
+        <result property="endTime"    column="endTime"    />
+        <result property="deadlineForRegistration"    column="deadlineForRegistration"    />
+        <result property="departmentRequirement"    column="departmentRequirement"    />
+    </resultMap>
+
+    <sql id="selectMeetingVo">
+        select meetingID, meetingTitle, location, startTime, endTime, deadlineForRegistration, departmentRequirement from meeting
+    </sql>
+
+    <select id="selectMeetingList" parameterType="Meeting" resultMap="MeetingResult">
+        <include refid="selectMeetingVo"/>
+        <where>  
+            <if test="meetingTitle != null  and meetingTitle != ''"> and meetingTitle = #{meetingTitle}</if>
+            <if test="location != null  and location != ''"> and location = #{location}</if>
+            <if test="startTime != null "> and startTime = #{startTime}</if>
+            <if test="endTime != null "> and endTime = #{endTime}</if>
+            <if test="deadlineForRegistration != null "> and deadlineForRegistration = #{deadlineForRegistration}</if>
+            <if test="departmentRequirement != null  and departmentRequirement != ''"> and departmentRequirement = #{departmentRequirement}</if>
+        </where>
+    </select>
+    
+    <select id="selectMeetingByMeetingID" parameterType="Long" resultMap="MeetingResult">
+        <include refid="selectMeetingVo"/>
+        where meetingID = #{meetingID}
+    </select>
+
+    <insert id="insertMeeting" parameterType="Meeting" useGeneratedKeys="true" keyProperty="meetingID">
+        insert into meeting
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="meetingTitle != null and meetingTitle != ''">meetingTitle,</if>
+            <if test="location != null">location,</if>
+            <if test="startTime != null">startTime,</if>
+            <if test="endTime != null">endTime,</if>
+            <if test="deadlineForRegistration != null">deadlineForRegistration,</if>
+            <if test="departmentRequirement != null">departmentRequirement,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="meetingTitle != null and meetingTitle != ''">#{meetingTitle},</if>
+            <if test="location != null">#{location},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="deadlineForRegistration != null">#{deadlineForRegistration},</if>
+            <if test="departmentRequirement != null">#{departmentRequirement},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMeeting" parameterType="Meeting">
+        update meeting
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="meetingTitle != null and meetingTitle != ''">meetingTitle = #{meetingTitle},</if>
+            <if test="location != null">location = #{location},</if>
+            <if test="startTime != null">startTime = #{startTime},</if>
+            <if test="endTime != null">endTime = #{endTime},</if>
+            <if test="deadlineForRegistration != null">deadlineForRegistration = #{deadlineForRegistration},</if>
+            <if test="departmentRequirement != null">departmentRequirement = #{departmentRequirement},</if>
+        </trim>
+        where meetingID = #{meetingID}
+    </update>
+
+    <delete id="deleteMeetingByMeetingID" parameterType="Long">
+        delete from meeting where meetingID = #{meetingID}
+    </delete>
+
+    <delete id="deleteMeetingByMeetingIDs" parameterType="String">
+        delete from meeting where meetingID in 
+        <foreach item="meetingID" collection="array" open="(" separator="," close=")">
+            #{meetingID}
+        </foreach>
+    </delete>
+</mapper>

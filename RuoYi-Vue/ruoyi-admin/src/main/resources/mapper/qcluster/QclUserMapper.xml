@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.qcluster.mapper.QclUserMapper">
+    
+    <resultMap type="QclUser" id="QclUserResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="sex"    column="sex"    />
+        <result property="department"    column="department"    />
+        <result property="position"    column="position"    />
+    </resultMap>
+
+    <sql id="selectQclUserVo">
+        select id, name, sex, department, position from qcl_user
+    </sql>
+
+    <select id="selectQclUserList" parameterType="QclUser" resultMap="QclUserResult">
+        <include refid="selectQclUserVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="sex != null  and sex != ''"> and sex = #{sex}</if>
+            <if test="department != null  and department != ''"> and department = #{department}</if>
+            <if test="position != null  and position != ''"> and position = #{position}</if>
+        </where>
+    </select>
+    
+    <select id="selectQclUserById" parameterType="Long" resultMap="QclUserResult">
+        <include refid="selectQclUserVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertQclUser" parameterType="QclUser" useGeneratedKeys="true" keyProperty="id">
+        insert into qcl_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="sex != null and sex != ''">sex,</if>
+            <if test="department != null">department,</if>
+            <if test="position != null">position,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="sex != null and sex != ''">#{sex},</if>
+            <if test="department != null">#{department},</if>
+            <if test="position != null">#{position},</if>
+         </trim>
+    </insert>
+
+    <update id="updateQclUser" parameterType="QclUser">
+        update qcl_user
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name = #{name},</if>
+            <if test="sex != null and sex != ''">sex = #{sex},</if>
+            <if test="department != null">department = #{department},</if>
+            <if test="position != null">position = #{position},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteQclUserById" parameterType="Long">
+        delete from qcl_user where id = #{id}
+    </delete>
+
+    <delete id="deleteQclUserByIds" parameterType="String">
+        delete from qcl_user where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

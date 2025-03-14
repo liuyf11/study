@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.good.mapper.GoodTypeMapper">
+    
+    <resultMap type="GoodType" id="GoodTypeResult">
+        <result property="typeId"    column="type_id"    />
+        <result property="typeName"    column="type_name"    />
+    </resultMap>
+
+    <resultMap id="GoodTypeGoodResult" type="GoodType" extends="GoodTypeResult">
+        <collection property="goodList" ofType="Good" column="type_id" select="selectGoodList" />
+    </resultMap>
+
+    <resultMap type="Good" id="GoodResult">
+        <result property="goodId"    column="good_id"    />
+        <result property="goodName"    column="good_name"    />
+        <result property="price"    column="price"    />
+        <result property="imageUrl"    column="image_url"    />
+        <result property="typeId"    column="type_id"    />
+    </resultMap>
+
+    <sql id="selectGoodTypeVo">
+        select type_id, type_name from good_type
+    </sql>
+
+    <select id="selectGoodTypeList" parameterType="GoodType" resultMap="GoodTypeResult">
+        <include refid="selectGoodTypeVo"/>
+        <where>  
+            <if test="typeName != null  and typeName != ''"> and type_name like concat('%', #{typeName}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectGoodTypeByTypeId" parameterType="Long" resultMap="GoodTypeGoodResult">
+        select type_id, type_name
+        from good_type
+        where type_id = #{typeId}
+    </select>
+
+    <select id="selectGoodList" resultMap="GoodResult">
+        select good_id, good_name, price, image_url, type_id
+        from good
+        where type_id = #{type_id}
+    </select>
+    <select id="selectGoodTypeListVo" resultType="com.ruoyi.good.domain.vo.GoodTypeVo">
+        SELECT
+        good_type.type_id,
+        good_type.type_name,
+        COUNT(good.good_id) AS good_count
+        FROM
+        good_type
+        LEFT JOIN
+        good ON good_type.type_id = good.type_id
+        <where>
+            <if test="typeName != null and typeName != ''">and type_name like concat('%', #{typeName}, '%')</if>
+        </where>
+        GROUP BY
+            good_type.type_id,
+        good_type.type_name
+    </select>
+
+
+    <insert id="insertGoodType" parameterType="GoodType" useGeneratedKeys="true" keyProperty="typeId">
+        insert into good_type
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="typeName != null and typeName != ''">type_name,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="typeName != null and typeName != ''">#{typeName},</if>
+         </trim>
+    </insert>
+
+    <update id="updateGoodType" parameterType="GoodType">
+        update good_type
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="typeName != null and typeName != ''">type_name = #{typeName},</if>
+        </trim>
+        where type_id = #{typeId}
+    </update>
+
+    <delete id="deleteGoodTypeByTypeId" parameterType="Long">
+        delete from good_type where type_id = #{typeId}
+    </delete>
+
+    <delete id="deleteGoodTypeByTypeIds" parameterType="String">
+        delete from good_type where type_id in 
+        <foreach item="typeId" collection="array" open="(" separator="," close=")">
+            #{typeId}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteGoodByTypeIds" parameterType="String">
+        delete from good where type_id in 
+        <foreach item="typeId" collection="array" open="(" separator="," close=")">
+            #{typeId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteGoodByTypeId" parameterType="Long">
+        delete from good where type_id = #{typeId}
+    </delete>
+
+    <insert id="batchGood">
+        insert into good( good_id, good_name, price, image_url, type_id) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.goodId}, #{item.goodName}, #{item.price}, #{item.imageUrl}, #{item.typeId})
+        </foreach>
+    </insert>
+</mapper>
